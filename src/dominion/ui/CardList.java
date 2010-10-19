@@ -15,20 +15,44 @@ import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
+/**
+ * Component that displays a list of images, with images later in the list
+ * overlapping the images earlier in the list.
+ * 
+ * @author Matt Spikes (csnut343)
+ */
 @SuppressWarnings("serial")
 public class CardList extends JPanel implements ListDataListener {
 
     /** Logical model of the data to be represented graphically by this component */
     private ListModel data;
-    /** Vertical offset of cards draw on the stack
-     *  i.e. How much of the top of each card is shown 
+    
+    /** 
+     * Vertical offset of cards draw on the stack,
+     * i.e. How much of the top of each card is shown 
      */
     private int vgap;
     
+    /**
+     * Creates a CardList with the specified data model and a default vertical
+     * gap value.
+     * 
+     * <p>The default vertical gap is 55 which is optimal for displaying just the name of
+     * the full dominion images.
+     * 
+     * @param data model of data displayed by this component
+     */
     public CardList(ListModel data) {
         this(data, 55);
     }
     
+    /**
+     * Creates a CardList with the specified data model and vertical gap.
+     * 
+     * @param data model of data displayed by this component
+     * @param vgap vertical gap between images 
+     * @throws IllegalArgumentException if vgap is zero or negative
+     */
     public CardList(ListModel data, int vgap) {
         if(vgap <= 0)
             throw new IllegalArgumentException("Vgap must be positive");
@@ -36,32 +60,52 @@ public class CardList extends JPanel implements ListDataListener {
         
         this.data = data;
         this.data.addListDataListener(this);
+        
+        // set a non-null value, just to trigger the display of tooltips
+        // actual value of tooltip determined by getToolTipText() function
         this.setToolTipText("");
     }
     
+    /**
+     * Sets the data model of this component.
+     * 
+     * @param data model of data displayed by this component
+     */
     public void setModel(ListModel data) {
         this.data = data;
         this.data.addListDataListener(this);
     }
     
+    /**
+     * Gets the vertical gap of this component.
+     * 
+     * @return the current vertical gap value
+     */
     public int getVgap() {
         return vgap;
     }
     
+    /**
+     * Sets the data model of this component.
+     * 
+     * @param vgap vertical gap between images 
+     * @throws IllegalArgumentException if vgap is zero or negative
+     */
     public void setVgap(int vgap) {
         if(vgap <= 0)
             throw new IllegalArgumentException("Vgap must be positive");
         this.vgap = vgap;
     }
     
+    /* does nothing
+     * this is to prevent components added to this CardList from interfering
+     * with the drawing of this component
+     */
     @Override
     protected void paintChildren(Graphics g) {
-        /* do nothing
-         * this is to prevent components added to this CardList from interfering 
-         * with the drawing of this component 
-         */
     }
     
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         
@@ -83,11 +127,12 @@ public class CardList extends JPanel implements ListDataListener {
         return img;
     }
     
+    @Override
     public String getToolTipText(MouseEvent e) {
         Point p = new Point(e.getPoint());
         p.x -= this.getX();
         p.y -= this.getY();
-        System.out.println("Mouse at: " + p);
+        //System.out.println("Mouse at: " + p);
         Insets ins = this.getInsets();
         
         p.x -= ins.left;
@@ -109,17 +154,20 @@ public class CardList extends JPanel implements ListDataListener {
                 "\"></img></html>";
     }
     
+    @Override
     public Dimension getPreferredSize() {
+        // if user has set a preferred size, defer to superclass to return that value
         if(isPreferredSizeSet())
             return super.getPreferredSize();
         
+        // otherwise, calculate the proper size
         int maxX = 0;
         int maxY = 0;
         for(int i = 0; i < data.getSize(); i++) {
             Image img = getCardImage(data.getElementAt(i));
             maxX = Math.max(maxX, img.getWidth(this));
             maxY = Math.max(maxY, img.getHeight(this) + (i*vgap));
-            System.out.printf("image of %s has dimensions [%d, %d]%n", data.getElementAt(i), img.getWidth(this), img.getHeight(this));
+            //System.out.printf("image of %s has dimensions [%d, %d]%n", data.getElementAt(i), img.getWidth(this), img.getHeight(this));
         }
         Insets ins = this.getInsets();
         maxX += ins.left + ins.right;
@@ -128,25 +176,25 @@ public class CardList extends JPanel implements ListDataListener {
         return new Dimension (maxX, maxY);
     }
     
-    //@Override
-    public void contentsChanged(ListDataEvent arg0) {
-        // TODO maybe do something smarter here
+    @Override
+    public void contentsChanged(ListDataEvent e) {
+        // TODO maybe do something more intelligent here
         repaint();
     }
 
-    //@Override
-    public void intervalAdded(ListDataEvent arg0) {
-        // TODO maybe do something smarter here
+    @Override
+    public void intervalAdded(ListDataEvent e) {
+        // TODO maybe do something more intelligent here
         repaint();
     }
 
-    //@Override
-    public void intervalRemoved(ListDataEvent arg0) {
-        // TODO maybe do something smarter here
+    @Override
+    public void intervalRemoved(ListDataEvent e) {
+        // TODO maybe do something more intelligent here
         repaint();
     }
     
-    static public void main(String[] args) {
+    /*static public void main(String[] args) {
         javax.swing.DefaultListModel model = new javax.swing.DefaultListModel();
         model.addElement("Bazaar");
         model.addElement("Market");
@@ -159,5 +207,5 @@ public class CardList extends JPanel implements ListDataListener {
         frame.getContentPane().add(new CardList(model, 25));
         frame.pack(); //(new java.awt.Dimension(305, 750));
         frame.setVisible(true);        
-    }
+    }//*/
 }
